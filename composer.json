@@ -1,0 +1,19 @@
+{
+	"name": "fivesqrd/ordin",
+	"description": "Simple Message Queue Client",
+	"require": {
+        "fivesqrd/bego": "~0.12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ordin\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Christian Burger",
+            "email": "christian@fivesqrd.com",
+            "role": "Developer"
+        }
+    ]
+}
