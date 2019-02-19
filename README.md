@@ -61,8 +61,8 @@ $result = $queue->add($event);
 
 ## Get all new messages from a queue
 ```
-/* Receive 5 jobs and lock them for 300 seconds (FIFO) */
-$messages = $queue->receive(5, 300);
+/* Receive 5 events */
+$messages = $queue->receive($observer, 5);
 
 foreach ($messages as $message) {
 

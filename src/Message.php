@@ -82,17 +82,10 @@ class Message
     /**
      * Prepare for flight
      */
-    public function prepare()
+    public function prepare($observer)
     {
-        /* Using the timeslot as a TTL for this attempt */
-        $this->_item->remove('Ttl');
-        $this->_item->set('Observer', gethostname());
-        $this->_item->set('Read', gmdate('c'));
-        $this->_item->set('Status', 'read');
-
-        /* Keep tabs on how many times we've returned this message */
-        $attempts = $this->_item->attribute('Attempts');
-        $this->_item->set('Attempts', $attempts + 1);
+        $this->_item->remove('Status');
+        $this->_item->add('Reads', $observer);
 
         return $attempts;
     }
@@ -100,9 +93,9 @@ class Message
     /**
      * Mark as unread
      */
-    public function unread()
+    public function unread($observer)
     {
-        $this->_item->set('Ttl', gmdate('U') + static::TTL);
+        $this->_item->delete('Reads', $observer);
 
         return $this;
     }

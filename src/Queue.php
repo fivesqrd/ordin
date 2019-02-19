@@ -45,7 +45,7 @@ class Queue
         return $item;
     }
 
-    public function receive($limit)
+    public function receive($observer, $limit)
     {
         $results = $this->_table->query(static::INDEX_NAME)
             ->key($this->_namespace)
@@ -60,7 +60,7 @@ class Queue
 
             $message = new Message($item);
 
-            $message->prepare();
+            $message->prepare($observer);
 
             /* 
              * Using attempts as a version number for optimistic locking.
@@ -69,7 +69,7 @@ class Queue
              */
 
             $conditions = [
-                 Bego\Condition::comperator('Attempts', '=', $attempts),
+                 Bego\Condition::notContains("Reads", $observer), //not(contains(#Reads, :Reads))
             ];
 
             /* 

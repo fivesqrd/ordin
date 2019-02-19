@@ -2,7 +2,7 @@
 	"name": "fivesqrd/ordin",
 	"description": "Simple Message Queue Client",
 	"require": {
-        "fivesqrd/bego": "~0.12.0"
+        "fivesqrd/bego": "~0.14.1"
     },
     "autoload": {
         "psr-4": {
