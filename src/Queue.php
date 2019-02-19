@@ -63,13 +63,11 @@ class Queue
             $message->prepare($observer);
 
             /* 
-             * Using attempts as a version number for optimistic locking.
-             * If the number of attempts is not consistent without our value,
-             * another observer has beaten us to taking this message
+             * If this observer is already listed, don't pass the message again
              */
 
             $conditions = [
-                 Bego\Condition::notContains("Reads", $observer), //not(contains(#Reads, :Reads))
+                Bego\Condition::notContains('Reads', $observer),
             ];
 
             /* 

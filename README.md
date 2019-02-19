@@ -1,5 +1,7 @@
-# Ordin PHP Client
-Ordin is a simple job queue library for PHP that uses DynamoDB for a backend.
+# Ordin
+Ordin is a simple message queue library for PHP that uses DynamoDB as backend. The queue is implemented to allow multiple observers to receive the same event, but that each observer will receive an event only once.
+
+This is useful in distributed micro service environments, where an event should be seen by all types of micro services, but only by one instance of each micro service type.
 
 ## Configuration
 ```

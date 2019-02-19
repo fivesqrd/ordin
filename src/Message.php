@@ -23,7 +23,6 @@ class Message
             'Ttl'       => gmdate('U') + static::TTL,
             'Destroy'   => gmdate('U') + 2592000,
             'Payload'   => $payload,
-            'Reads'     => [],
             'Status'    => 'unread'
         ]));
     }
@@ -85,7 +84,13 @@ class Message
     public function prepare($observer)
     {
         $this->_item->remove('Status');
-        $this->_item->add('Reads', $observer);
+
+        /* Add this observer to the set */
+        $observers = $this->_item->attribute('Reads', []);
+        $observers[] = $observer;
+
+        $this->_item->set('Reads', $observers);
+        
 
         return $attempts;
     }
