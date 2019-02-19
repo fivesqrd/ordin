@@ -23,7 +23,7 @@ class Message
             'Ttl'       => gmdate('U') + static::TTL,
             'Destroy'   => gmdate('U') + 2592000,
             'Payload'   => $payload,
-            'Attempts'  => 0,
+            'Reads'     => [],
             'Status'    => 'unread'
         ]));
     }
