@@ -28,8 +28,8 @@ class Model extends \Bego\Model
     {
         $this->_name = $name;
         $this->_indexes = [
-            'Namespace-Ttl-Index' => [
-                'key' => 'Namespace', 'sort' => 'Ttl'
+            'Unread-Index' => [
+                'key' => 'Unread'
             ],
         ];
     }

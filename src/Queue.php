@@ -3,17 +3,18 @@
 namespace Ordin;
 
 use Bego;
+use Bego\Condition;
 use Aws\DynamoDb;
 
 class Queue
 {
-    protected $_namespace;
-
     protected $_table;
 
-    const INDEX_NAME = 'Namespace-Ttl-Index';
+    protected $_observer;
 
-    public static function instance($config, $namespace)
+    const INDEX_NAME = 'Unread-Index';
+
+    public static function instance($config, $observer)
     {
         if (!isset($config['aws']['version'])) {
             $config['aws']['version'] = '2012-08-10';
@@ -27,28 +28,26 @@ class Queue
             new Model($config['table'])
         );
 
-        return new static($table, $namespace);
+        return new static($table, $observer);
     }
 
-    public function __construct($table, $namespace)
+    public function __construct($table, $observer)
     {
         $this->_table = $table;
-        $this->_namespace = $namespace;
+        $this->_observer = $observer;
     }
 
-    public function add(Message $message)
+    public function receive($limit)
     {
-        $this->_table->put(
-            $message->namespace($this->_namespace)->item()->attributes()
-        );
+        if (!$this->_observer) {
+            throw new \Exception(
+                'Observer name not set and cannot be identified'
+            );
+        }
 
-        return $item;
-    }
-
-    public function receive($observer, $limit)
-    {
+        /* todo: possbily use stream instead of a query */
         $results = $this->_table->query(static::INDEX_NAME)
-            ->key($this->_namespace)
+            ->key($this->_observer)
             ->limit($limit)
             ->fetch(); 
 
@@ -56,18 +55,16 @@ class Queue
 
         foreach ($results as $item) {
 
-            $attempts = $item->attribute('Attempts');
-
             $message = new Message($item);
 
-            $message->prepare($observer);
+            $message->prepare();
 
             /* 
-             * If this observer is already listed, don't pass the message again
+             * If not unread anymore, don't pass the message
              */
 
             $conditions = [
-                Bego\Condition::notContains('Reads', $observer),
+                Condition::attributeExists('Unread'),
             ];
 
             /* 

@@ -10,20 +10,17 @@ class Message
 
     protected $_attemptLimit = 3;
 
-    /* 5 minutes */
-    CONST TTL = 300;
+    /* 30 days */
+    CONST TTL = 2592000;
 
     public static function create($topic, $payload)
     {
         return new static(new Bego\Item([
             'Id'        => bin2hex(random_bytes(16)), 
             'Timestamp' => gmdate('c'),
-            'Namespace' => '',
             'Topic'     => $topic, 
-            'Ttl'       => gmdate('U') + static::TTL,
-            'Destroy'   => gmdate('U') + 2592000,
+            'Destroy'   => gmdate('U') + static::TTL,
             'Payload'   => $payload,
-            'Status'    => 'unread'
         ]));
     }
 
@@ -68,6 +65,17 @@ class Message
         return $this;
     }
 
+    /**
+     * Set this message's queue
+     */
+    public function observer($value)
+    {
+        $this->_item->set('Observer', $value);
+        $this->_item->set('Unread', $value);
+
+        return $this;
+    }
+
     public function item()
     {
         return $this->_item;
@@ -81,18 +89,10 @@ class Message
     /**
      * Prepare for flight
      */
-    public function prepare($observer)
+    public function prepare()
     {
-        $this->_item->remove('Status');
-
-        /* Add this observer to the set */
-        $observers = $this->_item->attribute('Reads', []);
-        $observers[] = $observer;
-
-        $this->_item->set('Reads', $observers);
-        
-
-        return $attempts;
+        $this->_item->remove('Unread');
+        $this->_item->set('Read', gmdate('c'));
     }
 
     /**
@@ -100,7 +100,7 @@ class Message
      */
     public function unread($observer)
     {
-        $this->_item->delete('Reads', $observer);
+        $this->_item->set('Unread', $observer);
 
         return $this;
     }

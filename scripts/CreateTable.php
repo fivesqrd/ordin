@@ -15,19 +15,22 @@ $spec = [
     ],
     'capacity'  => ['read' => 5, 'write' => 5],
     'indexes' => [
-        'Namespace-Ttl-Index' => [
+        'Unread-Index' => [
             'type' => 'global',
             'keys' => [
-                ['name' => 'Namespace', 'types' => ['key' => 'HASH', 'attribute' => 'S']],
-                ['name' => 'Ttl', 'types' => ['key' => 'RANGE', 'attribute' => 'N']],
+                ['name' => 'Unread', 'types' => ['key' => 'HASH', 'attribute' => 'S']],
             ],
             'capacity' => ['read' => 5, 'write' => 5]
         ],
     ]
 ];
 
+$client = new Aws\DynamoDb\DynamoDbClient($config['aws']);
+
 $db = new Bego\Database(
-    new Aws\DynamoDb\DynamoDbClient($config['aws']), new Aws\DynamoDb\Marshaler()
+    $client, new Aws\DynamoDb\Marshaler()
 );
+
+//$client->deleteTable(['TableName' => $config['table']]);
 
 $db->table(new Ordin\Model($config['table']))->create($spec);
