@@ -23,7 +23,7 @@ $spec = [
             ],
             'capacity' => ['read' => 5, 'write' => 5]
         ],
-        'Receipt-Sequence-Index' => [
+        'Observer-Sequence-Index' => [
             'type' => 'global',
             'keys' => [
                 ['name' => 'Observer', 'types' => ['key' => 'HASH', 'attribute' => 'S']],

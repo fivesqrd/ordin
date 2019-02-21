@@ -10,9 +10,6 @@ class Event
 
     protected $_attemptLimit = 3;
 
-    /* 5 minutes */
-    CONST TTL = 300;
-
     public static function create($topic, $payload)
     {
         return new static(new Bego\Item([
@@ -20,7 +17,6 @@ class Event
             'Timestamp'  => gmdate('c'),
             'SequenceId' => microtime(true),
             'Topic'      => $topic, 
-            'Ttl'        => gmdate('U') + static::TTL,
             'Destroy'    => gmdate('U') + 2592000,
             'Payload'    => $payload,
         ]));
@@ -34,6 +30,11 @@ class Event
     public function id()
     {
         return $this->get('Id');
+    }
+
+    public function topic()
+    {
+        return $this->get('Topic');
     }
 
     public function payload($key = null)

@@ -31,7 +31,7 @@ class Model extends \Bego\Model
             'Namespace-Sequence-Index' => [
                 'key' => 'Namespace', 'sort' => 'SequenceId'
             ],
-            'Receipt-Sequence-Index' => [
+            'Observer-Sequence-Index' => [
                 'key' => 'Observer', 'sort' => 'SequenceId'
             ],
         ];
