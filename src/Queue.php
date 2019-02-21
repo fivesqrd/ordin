@@ -13,7 +13,7 @@ class Queue
     protected $_table;
 
     const INDEX_QUEUE   = 'Namespace-Sequence-Index';
-    const INDEX_RECEIPT = 'Receipt-Sequence-Index';
+    const INDEX_RECEIPT = 'Observer-Sequence-Index';
 
     public static function instance($config, $namespace)
     {
