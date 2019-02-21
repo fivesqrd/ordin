@@ -15,19 +15,31 @@ $spec = [
     ],
     'capacity'  => ['read' => 5, 'write' => 5],
     'indexes' => [
-        'Namespace-Ttl-Index' => [
+        'Namespace-Sequence-Index' => [
             'type' => 'global',
             'keys' => [
                 ['name' => 'Namespace', 'types' => ['key' => 'HASH', 'attribute' => 'S']],
-                ['name' => 'Ttl', 'types' => ['key' => 'RANGE', 'attribute' => 'N']],
+                ['name' => 'SequenceId', 'types' => ['key' => 'RANGE', 'attribute' => 'N']],
+            ],
+            'capacity' => ['read' => 5, 'write' => 5]
+        ],
+        'Receipt-Sequence-Index' => [
+            'type' => 'global',
+            'keys' => [
+                ['name' => 'Observer', 'types' => ['key' => 'HASH', 'attribute' => 'S']],
+                ['name' => 'SequenceId', 'types' => ['key' => 'RANGE', 'attribute' => 'N']],
             ],
             'capacity' => ['read' => 5, 'write' => 5]
         ],
     ]
 ];
 
+$client = new Aws\DynamoDb\DynamoDbClient($config['aws']);
+
 $db = new Bego\Database(
-    new Aws\DynamoDb\DynamoDbClient($config['aws']), new Aws\DynamoDb\Marshaler()
+    $client, new Aws\DynamoDb\Marshaler()
 );
+
+//$client->deleteTable(['TableName' => $config['table']]);
 
 $db->table(new Ordin\Model($config['table']))->create($spec);

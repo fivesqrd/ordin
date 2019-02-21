@@ -1,5 +1,5 @@
 # Ordin
-Ordin is a simple message queue library for PHP that uses DynamoDB as backend. The queue is implemented to allow multiple observers to receive the same event, but that each observer will receive an event only once.
+Ordin is a simple event publish/subscribe queue library for PHP that uses DynamoDB as backend. The queue is implemented to allow multiple observers to receive the same event, but that each observer will receive an event only once.
 
 This is useful in distributed micro service environments, where an event should be seen by all types of micro services, but only by one instance of each micro service type.
 
@@ -53,24 +53,38 @@ $queue = Ordin\Queue::instance(
 ## Add an event to the queue
 ```
 
-$event = Ordin\Message::create(
+$event = Ordin\Event::create(
     'order.created', ['to' => 'you@domain.com', 'subject' => 'hello']
 );
 
-/* Run as soon as possible */
+/* Add event to queue */
 $result = $queue->add($event);
 ```
 
-## Get all new messages from a queue
+## Get all new events from a queue
 ```
 /* Receive 5 events */
-$messages = $queue->receive($observer, 5);
+$events = $queue->receive($observer)->fetch(5);
 
-foreach ($messages as $message) {
+foreach ($events as $event) {
 
-    $payload = $message->payload();
+    $payload = $event->payload();
 
     /* Do the work */
-    $jobId = $message->id();
+    $id = $event->id();
+}
+```
+
+## Get new events filtered by topic
+```
+/* Receive 5 events */
+$events = $queue->receive($observer)->topics(['order.released'])->fetch(5);
+
+foreach ($events as $event) {
+
+    $payload = $event->payload();
+
+    /* Do the work */
+    $id = $event->id();
 }
 ```

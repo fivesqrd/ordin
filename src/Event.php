@@ -4,7 +4,7 @@ namespace Ordin;
 
 use Bego;
 
-class Message
+class Event
 {
     protected $_item;
 
@@ -16,14 +16,13 @@ class Message
     public static function create($topic, $payload)
     {
         return new static(new Bego\Item([
-            'Id'        => bin2hex(random_bytes(16)), 
-            'Timestamp' => gmdate('c'),
-            'Namespace' => '',
-            'Topic'     => $topic, 
-            'Ttl'       => gmdate('U') + static::TTL,
-            'Destroy'   => gmdate('U') + 2592000,
-            'Payload'   => $payload,
-            'Status'    => 'unread'
+            'Id'         => 'Event:' . bin2hex(random_bytes(16)), 
+            'Timestamp'  => gmdate('c'),
+            'SequenceId' => microtime(true),
+            'Topic'      => $topic, 
+            'Ttl'        => gmdate('U') + static::TTL,
+            'Destroy'    => gmdate('U') + 2592000,
+            'Payload'    => $payload,
         ]));
     }
 
@@ -79,29 +78,12 @@ class Message
     }
 
     /**
-     * Prepare for flight
-     */
-    public function prepare($observer)
-    {
-        $this->_item->remove('Status');
-
-        /* Add this observer to the set */
-        $observers = $this->_item->attribute('Reads', []);
-        $observers[] = $observer;
-
-        $this->_item->set('Reads', $observers);
-        
-
-        return $attempts;
-    }
-
-    /**
      * Mark as unread
      */
     public function unread($observer)
     {
-        $this->_item->delete('Reads', $observer);
-
+        throw new \Exception('Not yet implemented');
+        
         return $this;
     }
 }

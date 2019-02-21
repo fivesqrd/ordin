@@ -3,6 +3,7 @@
 namespace Ordin;
 
 use Bego;
+use Bego\Condition;
 use Aws\DynamoDb;
 
 class Queue
@@ -11,7 +12,8 @@ class Queue
 
     protected $_table;
 
-    const INDEX_NAME = 'Namespace-Ttl-Index';
+    const INDEX_QUEUE   = 'Namespace-Sequence-Index';
+    const INDEX_RECEIPT = 'Receipt-Sequence-Index';
 
     public static function instance($config, $namespace)
     {
@@ -36,54 +38,40 @@ class Queue
         $this->_namespace = $namespace;
     }
 
-    public function add(Message $message)
+    public function add(Event $event)
     {
-        $this->_table->put(
-            $message->namespace($this->_namespace)->item()->attributes()
+        return $this->_table->put(
+            $event->namespace($this->_namespace)->item()->attributes()
         );
-
-        return $item;
     }
 
-    public function receive($observer, $limit)
+    public function receive($observer)
     {
-        $results = $this->_table->query(static::INDEX_NAME)
+        $lastSequenceId = $this->_getLastRead($observer);
+
+        $query = $this->_table
+            ->query(static::INDEX_QUEUE)
             ->key($this->_namespace)
-            ->limit($limit)
-            ->fetch(); 
+            ->condition(Condition::comperator('SequenceId', '>', $lastSequenceId));
 
-        $received = [];
+        return new Receive(
+            $query, new Receipt($this->_table, $observer)
+        );
+    }
 
-        foreach ($results as $item) {
+    protected function _getLastRead($observer)
+    {
+              /* Key=observer sort=Read:Time */
+        $results = $this->_table->query(static::INDEX_RECEIPT)
+            ->key($observer)
+            ->reverse()
+            ->limit(1)
+            ->fetch();
 
-            $attempts = $item->attribute('Attempts');
-
-            $message = new Message($item);
-
-            $message->prepare($observer);
-
-            /* 
-             * If this observer is already listed, don't pass the message again
-             */
-
-            $conditions = [
-                Bego\Condition::notContains('Reads', $observer),
-            ];
-
-            /* 
-             * Only if the update succeeded will we return the item 
-             */
-
-            if ($this->_table->update($message->item(), $conditions)) {
-                $received[] = $message;
-            }
+        if ($results->count() == 0) {
+            return 0;
         }
 
-        return $received;
-    }
-
-    public function unread($message)
-    {
-        $this->_table->update($message->unread()->item());
+        return $results->first()->attribute('SequenceId'); 
     }
 }
