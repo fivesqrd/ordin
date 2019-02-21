@@ -23,9 +23,14 @@ class Receive
         $this->_query->filter(Condition::in('Topic', $values));
     }
 
-    public function fetch($limit)
+    public function limit($value)
     {
-        $results = $this->_query->limit($limit)->fetch(); 
+        $this->_query->limit($value);
+    }
+
+    public function fetch()
+    {
+        $results = $this->_query->fetch(); 
 
         $received = [];
 

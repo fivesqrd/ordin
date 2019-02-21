@@ -64,7 +64,7 @@ $result = $queue->add($event);
 ## Get all new events from a queue
 ```
 /* Receive 5 events */
-$events = $queue->receive($observer)->fetch(5);
+$events = $queue->receive($observer)->limit(5)->fetch();
 
 foreach ($events as $event) {
 
