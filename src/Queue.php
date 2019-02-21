@@ -61,7 +61,6 @@ class Queue
 
     protected function _getLastRead($observer)
     {
-              /* Key=observer sort=Read:Time */
         $results = $this->_table->query(static::INDEX_RECEIPT)
             ->key($observer)
             ->reverse()
@@ -69,9 +68,19 @@ class Queue
             ->fetch();
 
         if ($results->count() == 0) {
-            return 0;
+            /* You must be new here */
+            return $this->_createFirstRead($observer)->attribute('SequenceId');
         }
 
         return $results->first()->attribute('SequenceId'); 
+    }
+
+    protected function _createFirstRead($observer)
+    {
+        /* Create a dummy event to read */
+        $dummy = Event::create('observer.registered', []);
+
+        /* Save the receipt and return the item */ 
+        return (new Receipt($this->_table, $observer))->create($dummy->item());
     }
 }
