@@ -28,8 +28,11 @@ class Model extends \Bego\Model
     {
         $this->_name = $name;
         $this->_indexes = [
-            'Unread-Index' => [
-                'key' => 'Unread'
+            'Namespace-Sequence-Index' => [
+                'key' => 'Namespace', 'sort' => 'SequenceId'
+            ],
+            'Receipt-Sequence-Index' => [
+                'key' => 'Observer', 'sort' => 'SequenceId'
             ],
         ];
     }

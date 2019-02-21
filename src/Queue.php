@@ -8,13 +8,14 @@ use Aws\DynamoDb;
 
 class Queue
 {
+    protected $_namespace;
+
     protected $_table;
 
-    protected $_observer;
+    const INDEX_QUEUE   = 'Namespace-Sequence-Index';
+    const INDEX_RECEIPT = 'Receipt-Sequence-Index';
 
-    const INDEX_NAME = 'Unread-Index';
-
-    public static function instance($config, $observer)
+    public static function instance($config, $namespace)
     {
         if (!isset($config['aws']['version'])) {
             $config['aws']['version'] = '2012-08-10';
@@ -28,59 +29,49 @@ class Queue
             new Model($config['table'])
         );
 
-        return new static($table, $observer);
+        return new static($table, $namespace);
     }
 
-    public function __construct($table, $observer)
+    public function __construct($table, $namespace)
     {
         $this->_table = $table;
-        $this->_observer = $observer;
+        $this->_namespace = $namespace;
     }
 
-    public function receive($limit)
+    public function add(Event $event)
     {
-        if (!$this->_observer) {
-            throw new \Exception(
-                'Observer name not set and cannot be identified'
-            );
-        }
-
-        /* todo: possbily use stream instead of a query */
-        $results = $this->_table->query(static::INDEX_NAME)
-            ->key($this->_observer)
-            ->limit($limit)
-            ->fetch(); 
-
-        $received = [];
-
-        foreach ($results as $item) {
-
-            $message = new Message($item);
-
-            $message->prepare();
-
-            /* 
-             * If not unread anymore, don't pass the message
-             */
-
-            $conditions = [
-                Condition::attributeExists('Unread'),
-            ];
-
-            /* 
-             * Only if the update succeeded will we return the item 
-             */
-
-            if ($this->_table->update($message->item(), $conditions)) {
-                $received[] = $message;
-            }
-        }
-
-        return $received;
+        return $this->_table->put(
+            $event->namespace($this->_namespace)->item()->attributes()
+        );
     }
 
-    public function unread($message)
+    public function receive($observer)
     {
-        $this->_table->update($message->unread()->item());
+        $lastSequenceId = $this->_getLastRead($observer);
+
+        $query = $this->_table
+            ->query(static::INDEX_QUEUE)
+            ->key($this->_namespace)
+            ->condition(Condition::comperator('SequenceId', '>', $lastSequenceId));
+
+        return new Receive(
+            $query, new Receipt($this->_table, $observer)
+        );
+    }
+
+    protected function _getLastRead($observer)
+    {
+              /* Key=observer sort=Read:Time */
+        $results = $this->_table->query(static::INDEX_RECEIPT)
+            ->key($observer)
+            ->reverse()
+            ->limit(1)
+            ->fetch();
+
+        if ($results->count() == 0) {
+            return 0;
+        }
+
+        return $results->first()->attribute('SequenceId'); 
     }
 }

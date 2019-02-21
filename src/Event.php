@@ -4,23 +4,25 @@ namespace Ordin;
 
 use Bego;
 
-class Message
+class Event
 {
     protected $_item;
 
     protected $_attemptLimit = 3;
 
-    /* 30 days */
-    CONST TTL = 2592000;
+    /* 5 minutes */
+    CONST TTL = 300;
 
     public static function create($topic, $payload)
     {
         return new static(new Bego\Item([
-            'Id'        => bin2hex(random_bytes(16)), 
-            'Timestamp' => gmdate('c'),
-            'Topic'     => $topic, 
-            'Destroy'   => gmdate('U') + static::TTL,
-            'Payload'   => $payload,
+            'Id'         => 'Event:' . bin2hex(random_bytes(16)), 
+            'Timestamp'  => gmdate('c'),
+            'SequenceId' => microtime(true),
+            'Topic'      => $topic, 
+            'Ttl'        => gmdate('U') + static::TTL,
+            'Destroy'    => gmdate('U') + 2592000,
+            'Payload'    => $payload,
         ]));
     }
 
@@ -65,17 +67,6 @@ class Message
         return $this;
     }
 
-    /**
-     * Set this message's queue
-     */
-    public function observer($value)
-    {
-        $this->_item->set('Observer', $value);
-        $this->_item->set('Unread', $value);
-
-        return $this;
-    }
-
     public function item()
     {
         return $this->_item;
@@ -87,21 +78,12 @@ class Message
     }
 
     /**
-     * Prepare for flight
-     */
-    public function prepare()
-    {
-        $this->_item->remove('Unread');
-        $this->_item->set('Read', gmdate('c'));
-    }
-
-    /**
      * Mark as unread
      */
     public function unread($observer)
     {
-        $this->_item->set('Unread', $observer);
-
+        throw new \Exception('Not yet implemented');
+        
         return $this;
     }
 }

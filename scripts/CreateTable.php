@@ -15,10 +15,19 @@ $spec = [
     ],
     'capacity'  => ['read' => 5, 'write' => 5],
     'indexes' => [
-        'Unread-Index' => [
+        'Namespace-Sequence-Index' => [
             'type' => 'global',
             'keys' => [
-                ['name' => 'Unread', 'types' => ['key' => 'HASH', 'attribute' => 'S']],
+                ['name' => 'Namespace', 'types' => ['key' => 'HASH', 'attribute' => 'S']],
+                ['name' => 'SequenceId', 'types' => ['key' => 'RANGE', 'attribute' => 'N']],
+            ],
+            'capacity' => ['read' => 5, 'write' => 5]
+        ],
+        'Receipt-Sequence-Index' => [
+            'type' => 'global',
+            'keys' => [
+                ['name' => 'Observer', 'types' => ['key' => 'HASH', 'attribute' => 'S']],
+                ['name' => 'SequenceId', 'types' => ['key' => 'RANGE', 'attribute' => 'N']],
             ],
             'capacity' => ['read' => 5, 'write' => 5]
         ],

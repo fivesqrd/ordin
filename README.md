@@ -1,7 +1,7 @@
 # Ordin
-Ordin is a simple message queue library for PHP that uses DynamoDB as backend. The queue is implemented to allow multiple observers to receive the same event, but that each observer will receive an event only once.
+Ordin is a simple event publish/subscribe queue library for PHP that uses DynamoDB as backend. The queue is implemented to allow multiple observers to receive the same event, but that each observer will receive an event only once.
 
-This is useful in distributed micro service environments, where a given event should be seen by all micro services, but only by one instance of each micro service.
+This is useful in distributed micro service environments, where an event should be seen by all types of micro services, but only by one instance of each micro service type.
 
 ## Configuration
 ```
@@ -43,55 +43,48 @@ Run the table create script
 php vendor/fivesqrd/ordin/scripts/CreateTable.php config.php
 ```
 
-## Register subscribers
+## Instantiate the queue
 ```
-$channel = Ordin\Channel::instance(
-    $config, 'My-Ecosystem', 
-);
-
-/* Register the observers for selected events */
-$channel->watch('My-App-1', ['order.created']);
-
-/* Register the observers for all events */
-$channel->watch('My-App-2');
-```
-
-Pre-register
-```
-$channel = Ordin\Channel::instance(
-    $config, 'My-Ecosystem', ['My-App-1' => ['order.created'], 'My-App-2' => []]
+$queue = Ordin\Queue::instance(
+    $config, 'My-App-Ecosystem'
 );
 ```
-
 
 ## Add an event to the queue
 ```
-$channel = Ordin\Channel::instance(
-    $config, 'My-Ecosystem', $observers
-);
 
-$event = Ordin\Message::create(
+$event = Ordin\Event::create(
     'order.created', ['to' => 'you@domain.com', 'subject' => 'hello']
 );
 
-/* Run as soon as possible */
-$result = $channel->broadcast($event);
+/* Add event to queue */
+$result = $queue->add($event);
 ```
 
-## Get filtered list of unread messages from a queue
+## Get all new events from a queue
 ```
-$queue = Ordin\Queue::instance(
-    $config, 'My-App-Ecosystem', 'My-App-1'
-);
-
 /* Receive 5 events */
-$messages = $queue->receive(5);
+$events = $queue->receive($observer)->fetch(5);
 
-foreach ($messages as $message) {
+foreach ($events as $event) {
 
-    $payload = $message->payload();
+    $payload = $event->payload();
 
     /* Do the work */
-    $jobId = $message->id();
+    $id = $event->id();
+}
+```
+
+## Get new events filtered by topic
+```
+/* Receive 5 events */
+$events = $queue->receive($observer)->topics(['order.released'])->fetch(5);
+
+foreach ($events as $event) {
+
+    $payload = $event->payload();
+
+    /* Do the work */
+    $id = $event->id();
 }
 ```
