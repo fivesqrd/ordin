@@ -21,11 +21,15 @@ class Receive
     public function topics($values)
     {
         $this->_query->filter(Condition::in('Topic', $values));
+
+        return $this;
     }
 
     public function limit($value)
     {
         $this->_query->limit($value);
+
+        return $this;
     }
 
     public function fetch()
