@@ -13,9 +13,7 @@ class Event
     public static function create($topic, $payload)
     {
         return new static(new Bego\Item([
-            'Id'         => 'Event:' . bin2hex(random_bytes(16)), 
             'Timestamp'  => gmdate('c'),
-            'SequenceId' => microtime(true),
             'Topic'      => $topic, 
             'Destroy'    => gmdate('U') + 2592000,
             'Payload'    => $payload,
@@ -56,6 +54,15 @@ class Event
         }
 
         return $data;
+    }
+
+    public function sequence()
+    {
+        $sequenceId = microtime(true);
+        $this->_item->set('Id', 'Event:' . $sequenceId);
+        $this->_item->set('SequenceId', $sequenceId);
+
+        return $this;
     }
 
     /**

@@ -40,9 +40,33 @@ class Queue
 
     public function add(Event $event)
     {
-        return $this->_table->put(
-            $event->namespace($this->_namespace)->item()->attributes()
-        );
+        $attempts = 0;
+
+        do {
+
+            $attributes = $event->namespace($this->_namespace)
+                ->sequence()
+                ->item()
+                ->attributes();
+
+            /* Attempt to create a unique timestamped record */
+
+            $result = $this->_table->put(
+                $attributes, [Condition::attributeNotExists('Id')]
+            );
+
+            /* if not regenerate and try again */
+
+        } while ($result === false && $attempts++ < 10);
+
+        if (!$result) {
+            /* No dice, we've given up */
+            throw new \Exception(
+                'Could not create unique event record'
+            );
+        }
+
+        return $result;
     }
 
     public function receive($observer)
