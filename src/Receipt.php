@@ -20,13 +20,17 @@ class Receipt
     {
         $parts = explode(':', $item->attribute('Id'));
 
-        return $this->_table->put([
+        $attributes = [
             'Id'          => "Receipt:{$this->_observer}:{$parts[1]}",
             'SequenceId'  => $item->attribute('SequenceId'),
             'Event'       => $item->attribute('Id'),
             'Observer'    => $this->_observer,
             'Timestamp'   => gmdate('c'),
             'Destroy'     => gmdate('U') + 2592000
-        ]);
+        ];
+
+        return $this->_table->put(
+            $attributes, [Bego\Condition::attributeNotExists('Id')]
+        );
     }
 }

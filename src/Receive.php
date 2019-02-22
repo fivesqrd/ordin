@@ -47,7 +47,7 @@ class Receive
             }
 
             /* 
-             * Only if the update succeeded will we return the item 
+             * Only if the receipt was created will we return the item 
              */
 
             $received[] = new Event($item);
