@@ -66,7 +66,7 @@ class Queue
             );
         }
 
-        return $result;
+        return $event;
     }
 
     public function receive($observer)
