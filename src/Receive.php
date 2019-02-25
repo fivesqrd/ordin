@@ -34,7 +34,7 @@ class Receive
 
     public function fetch()
     {
-        $results = $this->_query->fetch(); 
+        $results = $this->_query->fetch(null); 
 
         $received = [];
 
