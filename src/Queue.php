@@ -87,7 +87,7 @@ class Queue
     {
         $receipt = new Receipt($this->_table, $observer);
 
-        $item = $receipt->fetch($event->attribute('SequenceId'));
+        $item = $receipt->fetch($event->get('SequenceId'));
 
         if (!$item) {
             /* Nothing to delete */
