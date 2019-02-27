@@ -88,3 +88,14 @@ foreach ($events as $event) {
     $id = $event->id();
 }
 ```
+
+## Mark an event as unread for an observer
+```
+/* Receive 5 events */
+$events = $queue->receive($observer)->topics(['order.released'])->fetch(5);
+
+foreach ($events as $event) {
+
+    $queue->unread($event, $observer);
+}
+```

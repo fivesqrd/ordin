@@ -84,14 +84,4 @@ class Event
     {
         return $this->_item->attribute($key);
     }
-
-    /**
-     * Mark as unread
-     */
-    public function unread($observer)
-    {
-        throw new \Exception('Not yet implemented');
-        
-        return $this;
-    }
 }

@@ -83,6 +83,20 @@ class Queue
         );
     }
 
+    public function unread($event, $observer)
+    {
+        $receipt = new Receipt($this->_table, $observer);
+
+        $item = $receipt->fetch($event->attribute('SequenceId'));
+
+        if (!$item) {
+            /* Nothing to delete */
+            return false;
+        }
+
+        return $receipt->remove($item);
+    }
+
     protected function _getLastRead($observer)
     {
         $results = $this->_table->query(static::INDEX_RECEIPT)

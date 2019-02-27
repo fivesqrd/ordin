@@ -33,4 +33,16 @@ class Receipt
             $attributes, [Bego\Condition::attributeNotExists('Id')]
         );
     }
+
+    public function fetch($sequenceId)
+    {
+        return $this->_table->fetch(
+            "Receipt:{$this->_observer}:{$sequenceId}"
+        );
+    }
+
+    public function delete($item)
+    {
+        return $this->_table->delete($item);
+    }
 }
