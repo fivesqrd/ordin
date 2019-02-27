@@ -94,7 +94,7 @@ class Queue
             return false;
         }
 
-        return $receipt->remove($item);
+        return $receipt->delete($item);
     }
 
     protected function _getLastRead($observer)
