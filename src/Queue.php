@@ -116,7 +116,7 @@ class Queue
     protected function _createFirstRead($observer)
     {
         /* Create a dummy event to read */
-        $dummy = Event::create('observer.registered', []);
+        $dummy = Event::create('observer.registered', [])->sequence();
 
         /* Save the receipt and return the item */ 
         return (new Receipt($this->_table, $observer))->create($dummy->item());
