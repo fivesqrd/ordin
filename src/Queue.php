@@ -83,6 +83,14 @@ class Queue
         );
     }
 
+    /*
+     * Get an item from the store
+     */
+    public function fetch($key)
+    {
+        return $this->_table->fetch($key);
+    }
+
     public function unread($event, $observer)
     {
         $receipt = new Receipt($this->_table, $observer);
