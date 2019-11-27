@@ -89,7 +89,7 @@ class Queue
      */
     public function fetch($key)
     {
-        return $this->_table->fetch($key);
+        return new Event($this->_table->fetch($key));
     }
 
     /*
