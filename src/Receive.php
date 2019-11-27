@@ -20,6 +20,10 @@ class Receive
 
     public function topics($values)
     {
+        if (empty($values)) {
+            throw new \Excption('List of event topics may not be empty');
+        }
+        
         $this->_query->filter(Condition::in('Topic', $values));
 
         return $this;

@@ -14,6 +14,7 @@ class Queue
 
     const INDEX_QUEUE   = 'Namespace-Sequence-Index';
     const INDEX_RECEIPT = 'Observer-Sequence-Index';
+    const INDEX_FAULT   = 'Observer-Timestamp-Index';
 
     public static function instance($config, $namespace)
     {
@@ -89,6 +90,14 @@ class Queue
     public function fetch($key)
     {
         return $this->_table->fetch($key);
+    }
+
+    /*
+     * Log any errors
+     */
+    public function fault($observer)
+    {
+        return new Fault($this->_table, $observer);
     }
 
     public function unread($event, $observer)
